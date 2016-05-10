@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: alterastation
+  resources:
+    chain:
+      enabled: true

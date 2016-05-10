@@ -1,0 +1,86 @@
+group 'org.tarentum'
+version '0.1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'spring-boot'
+apply plugin: 'docker'
+apply plugin: 'net.saliman.cobertura'
+apply plugin: 'info.solidsoft.pitest'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'se.transmode.gradle:gradle-docker:1.2'
+        classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.3.3.RELEASE'
+        classpath 'net.saliman:gradle-cobertura-plugin:2.3.1'
+        classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.1.9'
+    }
+}
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+configurations.compile {
+    exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+}
+
+dependencies {
+    compile 'org.webjars:webjars-locator:0.30'
+    compile 'org.webjars:jquery:2.1.1'
+    compile 'org.webjars:bootstrap:3.2.0'
+    compile 'org.webjars:font-awesome:4.5.0'
+
+    compile 'org.springframework.boot:spring-boot-starter:1.3.3.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-web:1.3.3.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-jetty:1.3.3.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-freemarker:1.3.3.RELEASE'
+
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Version': project.version
+    }
+}
+
+task buildDocker(type: Docker, dependsOn: build) {
+    push = false
+    applicationName = jar.getBaseName()
+    dockerfile = file('src/main/docker/Dockerfile')
+    tagVersion = "latest"
+    doFirst {
+        copy {
+            from jar
+            into stageDir
+        }
+    }
+}
+
+cobertura {
+    coverageCheckTotalLineRate = 10
+    coverageCheckTotalBranchRate = 10
+    coverageExcludes = [
+            ".*org.tarentum.AlteraStation",
+            ".*org.tarentum.config.*"
+    ]
+}
+
+pitest {
+    excludedClasses = [
+            "org.tarentum.AlteraStation",
+            "org.tarentum.config.*"
+    ]
+    coverageThreshold = 10
+    mutationThreshold = 10
+    timestampedReports = false
+}
+
+test.finalizedBy project.tasks.cobertura
+test.finalizedBy project.tasks.pitest

@@ -1,0 +1,7 @@
+version: "2"
+services:
+  alterastation:
+    image: org.tarentum/alterastation:latest
+    ports:
+     - "8080:8080"
+     - "5005:5005"
