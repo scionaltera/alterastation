@@ -1,7 +1,7 @@
 FROM ingensi/oracle-jdk
 MAINTAINER Peter Keeler <scion@tarentum.org>
 EXPOSE 8080
-COPY . /opt/blog
+COPY . /opt/blog/
 RUN cd /opt/mud \
 && ./gradlew clean build \
 && cp -v build/libs/alterastation*.jar ./app.jar
